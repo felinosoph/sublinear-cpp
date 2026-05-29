@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0", "pybind11>=2.10.0", "ninja"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sublinear-cpp"
+version = "0.1.0"
+description = "A high-performance, C++ backed Count-Min Sketch for rapid text filtering"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    { name = "Stefan Ohms", email = "trusts.penguin0k@icloud.com" }
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: C++",
+    "Topic :: Text Processing :: Filters",
+]
+dependencies = [
+]
+
+[project.urls]
+"Homepage" = "https://github.com/felinosoph/sublinear-cpp"
+
+[tool.cibuildwheel]
+skip = ["*-manylinux_i686", "*-musllinux_i686", "*-win32", "pp*"]
+build-verbosity = 1
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]

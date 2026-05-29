@@ -1,59 +1,22 @@
-name: Build and Publish to PyPI
-
-# This workflow only triggers when you go to GitHub and click "Publish Release"
-on:
-  release:
-    types:
-      - published
-
-jobs:
-  build_wheels:
+build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-14]
+        # We removed macos-13 completely.
+        os: [ubuntu-latest, windows-latest, macos-14]
 
     steps:
       - uses: actions/checkout@v4
 
-      # cibuildwheel reads your pyproject.toml and automatically handles 
-      # the C++ compilation across multiple Python versions
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.17.0
+        env:
+          # This tells the Apple Silicon runner to compile the C++ code 
+          # for both modern M-chips AND older Intel chips simultaneously.
+          CIBW_ARCHS_MACOS: universal2
 
       - uses: actions/upload-artifact@v4
         with:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
-
-  build_sdist:
-    name: Build source distribution
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build sdist
-        run: pipx run build --sdist
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cibw-sdist
-          path: dist/*.tar.gz
-
-  upload_pypi:
-    needs: [build_wheels, build_sdist]
-    runs-on: ubuntu-latest
-    steps:
-      # Download all the wheels and the sdist compiled in the previous jobs
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: cibw-*
-          path: dist
-          merge-multiple: true
-
-      # Upload them securely to PyPI
-      - name: Publish package to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
